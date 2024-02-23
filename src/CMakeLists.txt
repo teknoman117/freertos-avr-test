@@ -4,7 +4,6 @@ target_link_libraries(test freertos)
 
 set_target_properties(test PROPERTIES
     OUTPUT_NAME "test.elf"
-    INTERPROCEDURAL_OPTIMIZATION ON
 )
 
 # Generate output files

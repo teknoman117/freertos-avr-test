@@ -10,10 +10,6 @@ add_library(freertos STATIC
     kernel/timers.c
 )
 
-set_target_properties(freertos PROPERTIES
-    INTERPROCEDURAL_OPTIMIZATION ON
-)
-
 target_include_directories(freertos
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/kernel/portable/ThirdParty/GCC/ATmega>
