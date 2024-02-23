@@ -1,7 +1,9 @@
-freertos-test
+freertos-avr-test
 =============
 
 A basic example of running FreeRTOS on an ATmega328p
+
+I *highly* recommend using the MinSizeRel configuration in CMake, otherwise the binary is huge.
 
 Building
 --------
