@@ -1,0 +1,6 @@
+[submodule "kernel"]
+	path = kernel
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel
+[submodule "dependencies/freertos/kernel"]
+	path = dependencies/freertos/kernel
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel
