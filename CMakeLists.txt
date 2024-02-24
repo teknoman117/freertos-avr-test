@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
+
+include(cmake/avr.cmake)
+
 project(freertos-test VERSION 0.1)
 
 set(CMAKE_SYSTEM_NAME "Generic")
