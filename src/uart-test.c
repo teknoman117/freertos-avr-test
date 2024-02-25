@@ -41,10 +41,6 @@ ISR(USART_UDRE_vect) {
     }
 }
 
-void vApplicationMallocFailedHook(void) {
-    while (1);
-}
-
 static int _putchar(char c, FILE *stream) {
     while (xQueueSendToBack(TransmitQueue, &c, 1) != pdPASS);
     UCSR0B |= _BV(UDRIE0);
@@ -59,6 +55,12 @@ static int _getchar(FILE *stream) {
 
 static FILE uart0_stream =
         FDEV_SETUP_STREAM(_putchar, _getchar, _FDEV_SETUP_RW);
+
+void setupLED(void) {
+    // Set LED pin to an output and default to off
+    DDRB |= _BV(PORTB5);
+    PORTB &= ~_BV(PORTB5);
+}
 
 void setupUART(void) {
     TransmitQueue = xQueueCreate(128, 1);
@@ -86,46 +88,22 @@ void TaskBlink1(void *pvParameters) {
     }
 }
 
-void TaskSend1(void *pvParameters) {
+void TaskSend(void *pvParameters) {
+    TickType_t rate = *(TickType_t *) pvParameters;
+    TickType_t delay = rate / portTICK_PERIOD_MS;
     TickType_t wakeUpTime = xTaskGetTickCount();
 
     while (1) {
         if (xSemaphoreTake(TransmitSemaphore, 10) == pdTRUE) {
-            printf_P(PSTR("[%u] I am task 1, I send every 333 ms\r\n"), xTaskGetTickCount());
+            printf_P(PSTR("[%u] This task sends every %u ms\r\n"), xTaskGetTickCount(), rate);
             xSemaphoreGive(TransmitSemaphore);
-            vTaskDelayUntil(&wakeUpTime, 333 / portTICK_PERIOD_MS);
+            vTaskDelayUntil(&wakeUpTime, delay);
         }
     }
 }
 
-void TaskSend2(void *pvParameters) {
-    TickType_t wakeUpTime = xTaskGetTickCount();
-
-    while (1) {
-        if (xSemaphoreTake(TransmitSemaphore, 10) == pdTRUE) {
-            printf_P(PSTR("[%u] I am task 2, I send every 500 ms\r\n"), xTaskGetTickCount());
-            xSemaphoreGive(TransmitSemaphore);
-            vTaskDelayUntil(&wakeUpTime, 500 / portTICK_PERIOD_MS);
-        }
-    }
-}
-
-void TaskSend3(void *pvParameters) {
-    TickType_t wakeUpTime = xTaskGetTickCount();
-
-    while (1) {
-        if (xSemaphoreTake(TransmitSemaphore, 10) == pdTRUE) {
-            printf_P(PSTR("[%u] I am task 3, I send every 1000 ms\r\n"), xTaskGetTickCount());
-            xSemaphoreGive(TransmitSemaphore);
-            vTaskDelayUntil(&wakeUpTime, 1000 / portTICK_PERIOD_MS);
-        }
-    }
-}
-
-void setupLED(void) {
-    // Set LED pin to an output and default to off
-    DDRB |= _BV(PORTB5);
-    PORTB &= ~_BV(PORTB5);
+void vApplicationMallocFailedHook(void) {
+    while (1);
 }
 
 void main(void) {
@@ -133,9 +111,13 @@ void main(void) {
     setupUART();
     sei();
 
+    TickType_t rate1 = 333;
+    TickType_t rate2 = 500;
+    TickType_t rate3 = 1000;
+
     xTaskCreate(TaskBlink1, "Blink1", 128, NULL, 2, NULL);
-    xTaskCreate(TaskSend1, "Send1", 128, NULL, 2, NULL);
-    xTaskCreate(TaskSend2, "Send2", 128, NULL, 2, NULL);
-    xTaskCreate(TaskSend3, "Send3", 128, NULL, 2, NULL);
+    xTaskCreate(TaskSend, "Send1", 128, &rate1, 2, NULL);
+    xTaskCreate(TaskSend, "Send2", 128, &rate2, 2, NULL);
+    xTaskCreate(TaskSend, "Send3", 128, &rate3, 2, NULL);
     vTaskStartScheduler();
 }
