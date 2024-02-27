@@ -14,7 +14,11 @@ static QueueHandle_t TransmitQueue, ReceiveQueue;
 static SemaphoreHandle_t TransmitSemaphore, ReceiveSemaphore;
 
 // read a byte
+#ifdef USART0_RX_vect
+ISR(USART0_RX_vect) {
+#else
 ISR(USART_RX_vect) {
+#endif
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     uint8_t cIn = UDR0;
 
@@ -25,7 +29,11 @@ ISR(USART_RX_vect) {
 }
 
 // send a byte
+#ifdef USART0_UDRE_vect
+ISR(USART0_UDRE_vect) {
+#else
 ISR(USART_UDRE_vect) {
+#endif
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     uint8_t cOut;
 
@@ -56,12 +64,6 @@ static int _getchar(FILE *stream) {
 static FILE uart0_stream =
         FDEV_SETUP_STREAM(_putchar, _getchar, _FDEV_SETUP_RW);
 
-void setupLED(void) {
-    // Set LED pin to an output and default to off
-    DDRB |= _BV(PORTB5);
-    PORTB &= ~_BV(PORTB5);
-}
-
 void setupUART(void) {
     TransmitQueue = xQueueCreate(128, 1);
     ReceiveQueue = xQueueCreate(128, 1);
@@ -75,17 +77,6 @@ void setupUART(void) {
     UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);
     UCSR0B = _BV(RXCIE0) | _BV(RXEN0) | _BV(TXEN0);
     UCSR0A = _BV(U2X0);
-}
-
-void TaskBlink1(void *pvParameters) {
-    // Blink every second
-    TickType_t wakeUpTime = xTaskGetTickCount();
-    while (1) {
-        PORTB |= _BV(PORTB5);
-        vTaskDelayUntil(&wakeUpTime, 500 / portTICK_PERIOD_MS);
-        PORTB &= ~_BV(PORTB5);
-        vTaskDelayUntil(&wakeUpTime, 500 / portTICK_PERIOD_MS);
-    }
 }
 
 void TaskSend(void *pvParameters) {
@@ -106,8 +97,11 @@ void vApplicationMallocFailedHook(void) {
     while (1);
 }
 
+void vApplicationStackOverflowHook(TaskHandle_t task, char*) {
+    while (1);
+}
+
 void main(void) {
-    setupLED();
     setupUART();
     sei();
 
@@ -115,7 +109,6 @@ void main(void) {
     TickType_t rate2 = 500;
     TickType_t rate3 = 1000;
 
-    xTaskCreate(TaskBlink1, "Blink1", 128, NULL, 2, NULL);
     xTaskCreate(TaskSend, "Send1", 128, &rate1, 2, NULL);
     xTaskCreate(TaskSend, "Send2", 128, &rate2, 2, NULL);
     xTaskCreate(TaskSend, "Send3", 128, &rate3, 2, NULL);

@@ -53,7 +53,7 @@
 #define configMAX_TASK_NAME_LEN             ( 8 )
 
 #define configQUEUE_REGISTRY_SIZE           0
-#define configCHECK_FOR_STACK_OVERFLOW      0
+#define configCHECK_FOR_STACK_OVERFLOW      1
 
 #define configUSE_TRACE_FACILITY            0
 #define configTICK_TYPE_WIDTH_IN_BITS       TICK_TYPE_WIDTH_16_BITS

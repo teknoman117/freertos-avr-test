@@ -8,6 +8,10 @@ void vApplicationMallocFailedHook(void) {
     while (1);
 }
 
+void vApplicationStackOverflowHook(TaskHandle_t task, char*) {
+    while (1);
+}
+
 void TaskBlink1(void *pvParameters) {
     // Blink every second
     TickType_t wakeUpTime = xTaskGetTickCount();
