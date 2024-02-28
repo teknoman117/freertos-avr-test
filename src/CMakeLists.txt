@@ -17,3 +17,8 @@ add_executable(uart-test uart-test.c)
 target_link_libraries(uart-test freertos)
 avr_add_extra_outputs(uart-test)
 
+# Stream Buffer Test
+add_executable(streambuffer-test streambuffer-test.c)
+target_link_libraries(streambuffer-test freertos)
+avr_add_extra_outputs(streambuffer-test)
+
