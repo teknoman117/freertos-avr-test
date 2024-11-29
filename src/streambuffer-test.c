@@ -100,7 +100,7 @@ void TaskGenerate(void *pvParameters) {
     while (1) {
         int num = rand();
         xStreamBufferSend(Buffer, &num, sizeof(num), 1);
-        vTaskDelayUntil(&wakeUpTime, 1000 / portTICK_PERIOD_MS);
+        vTaskDelayUntil(&wakeUpTime, 100 / portTICK_PERIOD_MS);
     }
 }
 
@@ -118,7 +118,7 @@ void main(void) {
 
     Buffer = xStreamBufferCreate(128, sizeof(int));
 
-    xTaskCreate(TaskWrite, "Write", 128, NULL, 2, NULL);
-    xTaskCreate(TaskGenerate, "Generate", 128, NULL, 2, NULL);
+    xTaskCreate(TaskWrite, "Write", 192, NULL, 2, NULL);
+    xTaskCreate(TaskGenerate, "Generate", 96, NULL, 2, NULL);
     vTaskStartScheduler();
 }
